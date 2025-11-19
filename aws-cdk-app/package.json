@@ -5,12 +5,14 @@
     "aws-cdk-app": "bin/aws-cdk-app.js"
   },
   "scripts": {
+    "prep": "npm i",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
     "bootstrap": "cdk bootstrap",
     "deploy": "cdk deploy --require-approval never"
+   
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
