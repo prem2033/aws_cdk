@@ -21,7 +21,7 @@ export class ApiGateway extends Stack {
             runtime: Runtime.NODEJS_18_X,
             handler: "api-gateway.handler",
             // code: Code.fromAsset("lambda"),
-            entry: join(__dirname, "../lambda/index.ts"),
+            entry: join(__dirname, "../lambda/api-gateway.ts"),
             timeout: Duration.minutes(2),
             logGroup: logGroup,
         })
