@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib/core';
 import { AwsCdkAppStack } from '../lib/aws-cdk-app-stack';
+import { ApiGateway } from '../lib/aws-api-gateway';
 
 const app = new cdk.App();
+
 new AwsCdkAppStack(app, 'aws-cdk-app', {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
@@ -17,4 +19,8 @@ new AwsCdkAppStack(app, 'aws-cdk-app', {
   env: { account: '141991823339', region: 'us-east-1' },
 
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+});
+
+new ApiGateway(app, 'aws-cdk-api-gateway', {
+  env: { account: '141991823339', region: 'us-east-1' },
 });

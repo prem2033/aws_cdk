@@ -24,9 +24,11 @@ jobs:
           node-version: '20.X'
 
       - name: Install dependencies
+        working-directory: aws-lambda
         run: npm run prep
 
       - name: Build Typescript
+        working-directory: aws-lambda
         run: npm run build
 
       - name: Install AWS CDK Globally

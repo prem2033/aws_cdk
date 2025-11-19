@@ -11,7 +11,7 @@
     "test": "jest",
     "cdk": "cdk",
     "bootstrap": "cdk bootstrap",
-    "deploy": "cdk deploy --require-approval never"
+    "deploy": "cdk deploy --all --require-approval never"
    
   },
   "devDependencies": {
