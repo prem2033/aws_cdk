@@ -1,4 +1,4 @@
-import { Stack, StackProps, Duration, RemovalPolicy } from 'aws-cdk-lib';
+import { Stack, StackProps, Duration, RemovalPolicy, CfnOutput } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { Function, Runtime, Code } from 'aws-cdk-lib/aws-lambda';
@@ -40,6 +40,7 @@ export class AwsCdkAppStack extends Stack {
       // code: Code.fromAsset('lambda'),
       entry: join(__dirname, "../lambda/index.ts"),
       timeout: Duration.minutes(2),
+      memorySize: 256,
       logGroup: logGroup
     });
 
@@ -50,5 +51,9 @@ export class AwsCdkAppStack extends Stack {
     fn.addEventSource(new SqsEventSource(queue));
     // Allow Lambda to interact with SQS
     queue.grantConsumeMessages(fn);
+
+    new CfnOutput(this, `${id}-stack`, {
+      value: this.stackName,
+    });
   }
 }

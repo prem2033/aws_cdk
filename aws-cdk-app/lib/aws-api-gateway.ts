@@ -18,10 +18,10 @@ export class ApiGateway extends Stack {
 
         const apiFunction = new NodejsFunction(this, `${id}-function`, {
             functionName: `${id}-function`,
-            runtime: Runtime.NODEJS_18_X,
-            handler: "api-gateway.handler",
-            // code: Code.fromAsset("lambda"),
-            entry: join(__dirname, "../lambda/api-gateway.ts"),
+            runtime: Runtime.NODEJS_22_X,
+            handler: 'index.ApiGatewayhandler',
+            // code: Code.fromAsset('lambda'),
+            entry: join(__dirname, "../lambda/index.ts"),
             timeout: Duration.minutes(2),
             logGroup: logGroup,
         })
@@ -59,11 +59,19 @@ export class ApiGateway extends Stack {
             },
         });
 
+        // you need to attach plan to use api key which will passed as x-api-key
+        plan.addApiKey(apiKey);
+        plan.addApiStage({
+            stage: apiGateway.deploymentStage,
+        });
+        new CfnOutput(this, `${id}-stack`, {
+            value: this.stackName,
+        });
+
         // Output the API URL for easy access
         new CfnOutput(this, `${id}-url`, {
             value: apiGateway.url,
             description: 'The URL of the API Gateway',
         });
-
     }
 }

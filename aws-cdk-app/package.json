@@ -5,9 +5,6 @@
   "bin": {
     "aws-cdk-app": "bin/aws-cdk-app.js"
   },
-  "workspaces": [
-    "lambda"
-  ],
   "scripts": {
     "prep": "npm i",
     "build": "tsc",
@@ -28,6 +25,9 @@
   },
   "dependencies": {
     "aws-cdk-lib": "2.215.0",
-    "constructs": "^10.0.0"
+    "constructs": "^10.0.0",
+    "@aws-sdk/client-dynamodb": "^3.600.0",
+    "@aws-sdk/lib-dynamodb": "^3.600.0",
+    "@aws-sdk/client-s3" : "^3.600.0"
   }
 }

@@ -7,14 +7,21 @@ import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as events from "aws-cdk-lib/aws-events";
 import * as eventTargets from "aws-cdk-lib/aws-events-targets";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
+import { join } from 'path';
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 
 export class AwsCdkS3Dynamo extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
+        const logGroup = new LogGroup(this, `${id}-log-group`, {
+            retention: RetentionDays.ONE_WEEK,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+        });
         // S3 Bucket
         const bucket = new s3.Bucket(this, `${id}-s3-bucket`, {
-            bucketName:`${id}-s3-bucket`,
+            bucketName: `${id}-s3-bucket`,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
             autoDeleteObjects: true,
         });
@@ -28,19 +35,21 @@ export class AwsCdkS3Dynamo extends cdk.Stack {
         });
 
         // SQS Queue
-        const queue = new sqs.Queue(this,`${id}-queue`, {
+        const queue = new sqs.Queue(this, `${id}-queue`, {
             queueName: `${id}-queue`,
             visibilityTimeout: cdk.Duration.seconds(60),
         });
 
         // Lambda Function
-        const handler = new lambda.Function(this, `${id}-function`, {
+        const handler = new NodejsFunction(this, `${id}-function`, {
             functionName: `${id}-function`,
             runtime: lambda.Runtime.NODEJS_18_X,
-            handler: "aws-cdk-s3-dynamo.handler",
-            code: lambda.Code.fromAsset("lambda"),
+            handler: 'index.AwsCdkS3DynamoHandler',
+            // code: Code.fromAsset('lambda'),
+            entry: join(__dirname, "../lambda/index.ts"),
             timeout: cdk.Duration.seconds(60),
             memorySize: 256,
+            logGroup,
             environment: {
                 BUCKET_NAME: bucket.bucketName,
                 TABLE_NAME: table.tableName,
@@ -64,7 +73,11 @@ export class AwsCdkS3Dynamo extends cdk.Stack {
             //         email: "premprakash2033@gmail.com"
             //     })
             // })],
-            targets : [new eventTargets.LambdaFunction(handler)]
+            targets: [new eventTargets.LambdaFunction(handler)]
+        });
+
+        new cdk.CfnOutput(this, `${id}-stack`, {
+            value: this.stackName,
         });
     }
 }

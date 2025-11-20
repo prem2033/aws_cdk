@@ -1,10 +1,15 @@
-export const handler = async (event: any, context: any) => {
-    console.log('invoked API Gateway', { event, context });
-    return {
-        statusCode: 200,
-        body: JSON.stringify({
-            message: "Hello From APi Gateway",
-        }),
+export class ApiGateway {
+    protected event: any;
+    constructor(event: any) {
+        this.event = event;
+    }
+    public process() {
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                message: "Hello From APi Gateway",
+            }),
+        }
     }
 }
 
