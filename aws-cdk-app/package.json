@@ -1,9 +1,13 @@
 {
   "name": "aws-cdk-app",
   "version": "0.1.0",
+  "private": true,
   "bin": {
     "aws-cdk-app": "bin/aws-cdk-app.js"
   },
+  "workspaces": [
+    "lambda"
+  ],
   "scripts": {
     "prep": "npm i",
     "build": "tsc",
@@ -12,7 +16,6 @@
     "cdk": "cdk",
     "bootstrap": "cdk bootstrap",
     "deploy": "cdk deploy --all --require-approval never"
-   
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
