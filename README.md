@@ -31,3 +31,6 @@
 
 ## Check path on terminal 
     node -e "console.log(require('fs').readdirSync('./lambda'))"
+
+## package.json
+    private : true || it will not get pusbilsh to npm registery even we run accidently
