@@ -25,7 +25,7 @@ jobs:
           node-version: 22.X
 
       - name: install AWS CDK Globally
-        uses: npm install -g aws-cdk
+        run: npm install -g aws-cdk
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
