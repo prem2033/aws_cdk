@@ -1,7 +1,4 @@
-import { app } from "./app.js";
+import serverlessExpress from '@codegenie/serverless-express';
+import { app } from './app.js';
 
-import serverlessExpress from "@codegenie/serverless-express"
-
-export const handler = serverlessExpress.configure({
-  app
-});
+export const handler = serverlessExpress({ app });

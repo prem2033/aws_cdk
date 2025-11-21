@@ -1,7 +1,6 @@
 {
   "name": "express-lambda",
   "version": "0.1.0",
-  "type": "module",
   "bin": {
     "express-lambda": "bin/express-lambda.js"
   },
@@ -10,7 +9,9 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "prep": "npm install"
+    "prep": "npm install",
+    "bootstrap": "cdk bootstrap",
+    "deploy": "cdk deploy --all --require-approval never"
   },
   "devDependencies": {
     "@types/express": "^5.0.5",

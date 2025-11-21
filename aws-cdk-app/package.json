@@ -12,6 +12,7 @@
     "test": "jest",
     "cdk": "cdk",
     "bootstrap": "cdk bootstrap",
+    "synth": "cdk synth",
     "deploy": "cdk deploy --all --require-approval never"
   },
   "devDependencies": {

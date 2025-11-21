@@ -1,47 +1,45 @@
-name: aws-cdk-app
+name: express-lambda
 
 on:
   pull_request:
-      branches: [ main, master ]
-      types: [opened, synchronize, reopened]
-
+    branches: [main, master]
+    types : [opened, synchronize, reopened]
   push:
     branches:
       - main
       - master
-
   workflow_dispatch:
 
 jobs:
   deploy:
-    name: Deploy to AWS
+    name: express-api
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22.X
 
-      - name: Install AWS CDK Globally
-        run: npm install -g aws-cdk
+      - name: install AWS CDK Globally
+        uses: npm install -g aws-cdk
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id : ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'us-east-1'
 
       - name: Install Dependencies
-        working-directory: aws-cdk-app
+        working-directory: express-lambda
         run: npm run prep
 
-      - name: Build Project
-        working-directory: aws-cdk-app
+      - name: build Project
+        working-directory : express-lambda
         run: npm run build
 
       - name: CDK Bootstrap (Only first time)
