@@ -1,34 +1,33 @@
 {
-  "name": "aws-cdk-app",
+  "name": "express-lambda",
   "version": "0.1.0",
-  "private": true,
   "bin": {
-    "aws-cdk-app": "bin/aws-cdk-app.js"
+    "express-lambda": "bin/express-lambda.js"
   },
   "scripts": {
-    "prep": "npm i",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
+    "prep": "npm install",
     "bootstrap": "cdk bootstrap",
-    "synth": "cdk synth",
     "deploy": "cdk deploy --all --require-approval never"
   },
   "devDependencies": {
+    "@types/express": "^5.0.5",
     "@types/jest": "^29.5.14",
-    "@types/node": "22.7.9",
+    "@types/node": "^24.10.1",
+    "aws-cdk": "2.1032.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
-    "aws-cdk": "2.1032.0",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3"
   },
   "dependencies": {
+    "@codegenie/serverless-express": "github:vendia/serverless-express",
+    "@vendia/serverless-express": "^4.12.6",
     "aws-cdk-lib": "2.215.0",
     "constructs": "^10.0.0",
-    "@aws-sdk/client-dynamodb": "^3.600.0",
-    "@aws-sdk/lib-dynamodb": "^3.600.0",
-    "@aws-sdk/client-s3" : "^3.600.0"
+    "express": "^5.1.0"
   }
 }

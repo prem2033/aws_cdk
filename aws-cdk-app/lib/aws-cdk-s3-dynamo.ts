@@ -46,7 +46,7 @@ export class AwsCdkS3Dynamo extends cdk.Stack {
         // Lambda Function
         const handler = new NodejsFunction(this, `${id}-function`, {
             functionName: `${id}-function`,
-            runtime: lambda.Runtime.NODEJS_18_X,
+            runtime: lambda.Runtime.NODEJS_22_X,
             handler: "index.AwsCdkS3DynamoHandler",
             entry: join(__dirname, "../lambda/index.ts"),
             timeout: cdk.Duration.seconds(60),
