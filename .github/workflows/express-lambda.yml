@@ -43,7 +43,7 @@ jobs:
         run: npm run build
 
       - name: CDK Bootstrap (Only first time)
-        working-directory: aws-cdk-app
+        working-directory: express-lambda
         run: npm run bootstrap
 
       - name: CDK Deploy
