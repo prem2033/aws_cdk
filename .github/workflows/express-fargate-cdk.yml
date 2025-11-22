@@ -47,11 +47,17 @@ jobs:
           docker build -t $ECR_REPO:$IMAGE_TAG .
 
 
-      # Tag Image
+      # Tag Dokcer Image
       - name: Tag Docker Image
         run: |
           docker tag $ECR_REPO:$IMAGE_TAG \
           ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+
+      # create ECR repo if not exists
+      - name: Create ECR Repository if not exists
+        run: |
+          aws ecr describe-repositories --repository-names $ECR_REPO --region $AWS_REGION || \
+          aws ecr create-repository --repository-name $ECR_REPO --region $AWS_REGION
 
       # Push Image
       - name: Push Docker Image
