@@ -1,0 +1,90 @@
+name: ECS Fargate Deploy
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  WORK_DIR: express-fargate-cdk
+  ECR_REPO: express-fargate-cdk
+  IMAGE_TAG: latest
+
+jobs:
+  deploy:
+    name: Deploy Express Fargate CDK App    
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ env.WORK_DIR }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        run: |
+            aws ecr get-login-password --region $AWS_REGION | docker login \
+            --username AWS \
+            --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      # Build Docker Image
+      - name: Build Docker Image
+        working-directory: ${{ env.WORK_DIR }}/express-app
+        run: |
+          docker build -t $ECR_REPO:$IMAGE_TAG .
+
+
+      # Tag Image
+      - name: Tag Docker Image
+        run: |
+          docker tag $ECR_REPO:$IMAGE_TAG \
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+
+      # Push Image
+      - name: Push Docker Image
+        run: |
+          docker push \
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.X
+
+      - name: Install CDK Globally
+        run: npm install -g aws-cdk
+
+      - name: Install Dependencies
+        run: npm run prep
+
+      - name: Build CDK Project
+        run: npm run build
+
+      # Conditionally bootstrap only if needed
+      - name: Conditional CDK Bootstrap
+        run: |
+          if aws cloudformation describe-stacks --stack-name CDKToolkit --region $AWS_REGION >/dev/null 2>&1; then
+            echo "CDK already bootstrapped. Skipping."
+          else
+            echo "Bootstrapping CDK..."
+            cdk bootstrap aws://$AWS_ACCOUNT_ID/$AWS_REGION
+          fi
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+      - name: CDK Deploy
+        run: cdk deploy --require-approval never
