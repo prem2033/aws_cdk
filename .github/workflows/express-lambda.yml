@@ -10,6 +10,10 @@ on:
       - master
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: express-lambda
+
 jobs:
   deploy:
     name: express-api
@@ -35,17 +39,20 @@ jobs:
           aws-region: 'us-east-1'
 
       - name: Install Dependencies
-        working-directory: express-lambda
         run: npm run prep
 
       - name: build Project
-        working-directory : express-lambda
         run: npm run build
 
-      - name: CDK Bootstrap (Only first time)
-        working-directory: express-lambda
-        run: npm run bootstrap
+      - name: Conditional CDK Bootstrap
+        run: |
+          if aws cloudformation describe-stacks --stack-name CDKToolkit >/dev/null 2>&1; then
+            echo "CDK already bootstrapped. Skipping bootstrap..."
+          else
+            echo "CDK not bootstrapped. Running bootstrap..."
+            npm run bootstrap
+          fi
+
 
       - name: CDK Deploy
-        working-directory: express-lambda
         run: npm run deploy
