@@ -2,7 +2,7 @@ import express from "express";
 export const app = express();
 
 app.get("/", (req, res) => {
-    res.send("Hello from Express over ECS + CDK!");
+    res.send("Hello from Express over ECS + CDK!!");
 });
 
 app.get("/users", (req, res) => {
