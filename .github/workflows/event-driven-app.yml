@@ -1,0 +1,57 @@
+name: aws-cdk-app
+
+on:
+  pull_request:
+      branches: [ main, master ]
+      types: [opened, synchronize, reopened]
+
+  push:
+    branches:
+      - main
+      - master
+
+  workflow_dispatch:
+
+defaults:
+  working-directory: event-driven-app
+jobs:
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.X
+
+      - name: Install AWS CDK Globally
+        run: npm install -g aws-cdk
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-1'
+
+      - name: Install Dependencies
+        run: npm run prep
+
+      - name: Building Project 
+        run: npm run build
+
+      - name: Conditional CDK Bootstrap
+        run: |
+          if aws cloudformation describe-stacks --stack-name CDKToolkit >/dev/null 2>&1; then
+            echo "CDK already bootstrapped. Skipping bootstrap..."
+          else
+            echo "CDK not bootstrapped. Running bootstrap..."
+            npm run bootstrap
+          fi
+
+      - name: Deploy to AWS
+        run: npm run deploy
