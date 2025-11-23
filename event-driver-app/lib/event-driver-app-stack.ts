@@ -7,6 +7,7 @@ import { Table, AttributeType, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events'
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 
 
 export class EventDriverAppStack extends cdk.Stack {
@@ -24,7 +25,7 @@ export class EventDriverAppStack extends cdk.Stack {
     const publisherQueue = new sqs.Queue(this, `${id}-publisher-queue`, {
       queueName: `${id}-publisher-queue`,
       visibilityTimeout: cdk.Duration.minutes(5),
-      retentionPeriod: cdk.Duration.minutes(2),
+      retentionPeriod: cdk.Duration.days(2),
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       deadLetterQueue: {
         maxReceiveCount: 3,
@@ -32,11 +33,34 @@ export class EventDriverAppStack extends cdk.Stack {
       },
     });
 
+    // consumer deal letter queue
+    const consuemrDlq = new sqs.Queue(this, `${id}-consumer-dlq`, {
+      queueName: `${id}-consumer-dlq`,
+      retentionPeriod: cdk.Duration.days(5),
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    //consuemr queue to recevie event from event bus
+    const consumerQueue = new sqs.Queue(this, `${id}-consumer-queue`, {
+      queueName: `${id}-consumer-queue`,
+      visibilityTimeout: cdk.Duration.minutes(5),
+      retentionPeriod: cdk.Duration.days(5),
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      deadLetterQueue: {
+        maxReceiveCount: 3,
+        queue: consuemrDlq,
+      },
+    });
+
+    const eventLogGroup = new LogGroup(this, `${id}-event-log`, {
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      retention: RetentionDays.ONE_WEEK,
+    })
     // EventBridge Bus
     const eventBus = new EventBus(this, `${id}-publisher-event-bus`, {
       eventBusName: `${id}-event-bus`,
-
     });
+
     eventBus.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
     // lambda that will get attached to queu to push event to Event Bridge
@@ -45,6 +69,7 @@ export class EventDriverAppStack extends cdk.Stack {
       entry: "src/handlers/push-event.ts",
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
+      timeout: cdk.Duration.minutes(3),
       environment: {
         PUBLISHER_QUEUE_URL: publisherQueue.queueUrl,
         EVENT_BUS_NAME: eventBus.eventBusName
@@ -56,8 +81,9 @@ export class EventDriverAppStack extends cdk.Stack {
 
     // EventBridge Rule → processingQueue
     const rule = new Rule(this, `${id}-event-bus-rule`, {
-      ruleName : `${id}-event-bus-rule`,
+      ruleName: `${id}-event-bus-rule`,
       eventBus: eventBus,
+
       eventPattern: {
         source: ["event-driven"],
         detailType: ["user.crud"],
@@ -67,7 +93,7 @@ export class EventDriverAppStack extends cdk.Stack {
         //   }
         // }
       },
-      targets: [new SqsQueue(publisherQueue)]
+      targets: [new SqsQueue(consumerQueue)]
     });
     rule.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
@@ -77,31 +103,10 @@ export class EventDriverAppStack extends cdk.Stack {
 
     // end of publisher
 
-    // start of consumers
-
-    // consumer deal letter queue
-    const consuemrDlq = new sqs.Queue(this, `${id}-consumer-dlq`, {
-      queueName: `${id}-consumer-dlq`,
-      retentionPeriod: cdk.Duration.days(14),
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
-
-    //consuemr queue to recevie event from event bus
-    const consumerQueue = new sqs.Queue(this, `${id}-consumer-queue`, {
-      queueName: `${id}-consumer-queue`,
-      visibilityTimeout: cdk.Duration.minutes(5),
-      retentionPeriod: cdk.Duration.minutes(2),
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      deadLetterQueue: {
-        maxReceiveCount: 3,
-        queue: consuemrDlq,
-      },
-    });
-
-
+    // start of consumers resources
     // DynamoDB Table
     const consuemrTable = new Table(this, `${id}-consumer-table`, {
-      tableName:`${id}-consumer-table`,
+      tableName: `${id}-consumer-table`,
       partitionKey: { name: "email", type: AttributeType.STRING },
       billingMode: BillingMode.PAY_PER_REQUEST,
       pointInTimeRecovery: true,
@@ -113,6 +118,7 @@ export class EventDriverAppStack extends cdk.Stack {
       functionName: `${id}-consumer-handler`,
       entry: "src/handlers/consumer-event.ts",
       handler: "handler",
+      timeout: cdk.Duration.minutes(3),
       runtime: Runtime.NODEJS_22_X,
       environment: {
         CONSUMER_QUEUE_URL: consumerQueue.queueUrl,

@@ -12,17 +12,17 @@ export const handler: SQSHandler = async (event: any) => {
         const body = JSON.parse(record.body);
 
         entries.push({
-            detailType: 'user.crud',
-            source: 'event-driven',
+            DetailType: 'user.crud',
+            Source: 'event-driven',
             EventBusName: BUS_NAME,
             Detail: JSON.stringify(body.data ?? body)
         });
     }
     console.log('event to be pusblished', JSON.stringify(entries))
 
-    while (entries.length > 0) {
-        const chunk = entries.splice(0, 10);
-        await eb.send(new PutEventsCommand({ Entries: chunk }));
-    }
-    console.log('Published to event Bus');
+    // while (entries.length > 0) {
+    // const chunk = entries.splice(0, 10);
+    const response= await eb.send(new PutEventsCommand({ Entries: entries }));
+    // }
+    console.log('Published to event Bus', JSON.stringify(response));
 };

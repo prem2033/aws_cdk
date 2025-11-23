@@ -13,7 +13,9 @@ on:
   workflow_dispatch:
 
 defaults:
-  working-directory: event-driven-app
+  run:
+    working-directory: event-driven-app
+    
 jobs:
   deploy:
     name: Deploy to AWS
