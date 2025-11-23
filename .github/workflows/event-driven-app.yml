@@ -1,4 +1,4 @@
-name: aws-cdk-app
+name: event-driven-app
 
 on:
   pull_request:
@@ -15,7 +15,7 @@ on:
 defaults:
   run:
     working-directory: event-driven-app
-    
+
 jobs:
   deploy:
     name: Deploy to AWS
