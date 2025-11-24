@@ -1,4 +1,4 @@
-name: ECS Fargate CDK Deploy
+name: Express Fargate:Push images
 
 on:
   push:
@@ -9,13 +9,13 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  WORK_DIR: express-fargate-cdk
-  ECR_REPO: express-fargate-cdk
+  WORK_DIR: express-fargate
+  ECR_REPO: express-fargate
   IMAGE_TAG: latest
 
 jobs:
   deploy:
-    name: Deploy Express Fargate CDK App    
+    name: Push docker images  
     runs-on: ubuntu-latest
 
     defaults:
