@@ -10,7 +10,7 @@
     "test": "jest",
     "cdk": "cdk",
     "prep": "npm install",
-    "deploy": "cdk deploy --require-approval never --context stage=dev",
+    "deploy": "cdk deploy --require-approval never --context stage=qa",
     "synth": "cdk synth",
     "diff": "cdk diff"
   },
