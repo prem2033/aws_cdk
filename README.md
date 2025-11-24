@@ -34,3 +34,13 @@
 
 ## package.json
     private : true || it will not get pusbilsh to npm registery even we run accidently
+
+
+## Description 
+    -   aws-cdk-app : Simple cdk app to demostration purpose
+    -   event=driven-app : This is a cdk app which published message to evenrBus through Lambda
+                       EventBus rule place it to Consumer SQs and lambda process to DyanmoDB
+    -   expres-fargate : simple project to push docker Image to ECR and deploy to ECS
+    -   express-fargate-cdk : express API, where image has been pused from gtihub Pipeline and 
+                          Deployemt to ECS from DCK app
+    -   express-lambda : an express app which is wrapped in a helper package to run on lambda
