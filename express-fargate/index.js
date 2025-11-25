@@ -2,11 +2,11 @@ import  express from 'express'
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("Hello from Express running on ECS Fargate!");
+  res.status(200).send("Hello from Express running on ECS Fargate!");
 });
 
 app.get("/users", (req, res) => {
-    res.json([
+    res.status(200).json([
         { id: 1, name: "Test Name" }
     ]);
 });
