@@ -3,8 +3,12 @@ name: Express Fargate:Push images
 on:
   push:
     branches: [main, master]
+    paths: [aws_cdk/express-fargate/**]
+
   pull_request:
     branches: [main, master]
+    paths: [aws_cdk/express-fargate/**]
+
   workflow_dispatch:
 
 env:
@@ -15,7 +19,7 @@ env:
 
 jobs:
   deploy:
-    name: Push docker images  
+    name: Push docker images
     runs-on: ubuntu-latest
 
     defaults:
@@ -26,7 +30,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -36,16 +39,15 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-            aws ecr get-login-password --region $AWS_REGION | docker login \
-            --username AWS \
-            --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+          aws ecr get-login-password --region $AWS_REGION | docker login \
+          --username AWS \
+          --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
 
       # Build Docker Image
       - name: Build Docker Image
         working-directory: ${{ env.WORK_DIR }}
         run: |
           docker build -t $ECR_REPO:$IMAGE_TAG .
-
 
       # Tag Dokcer Image
       - name: Tag Docker Image
@@ -64,7 +66,6 @@ jobs:
         run: |
           docker push \
           ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-
 
       # - name: Setup Node.js
       #   uses: actions/setup-node@v4

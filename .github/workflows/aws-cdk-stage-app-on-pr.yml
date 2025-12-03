@@ -1,54 +1,59 @@
-name: event-driven-app
+name: aws-cdk-stagr-app-on-pr
 
 on:
   pull_request:
-    branches: [main, master]
+    branches: [main]
     types: [opened, synchronize, reopened]
     paths:
-      - "aws_cdk/event-driven-app/**"
-
-  push:
-    branches:
-      - main
-      - master
-    paths:
-      - "aws_cdk/event-driven-app/**"
+      - "aws_cdk/aws-cdk-stagr-app/**"
 
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: 141991823339
+
 defaults:
   run:
-    working-directory: event-driven-app
+    working-directory: aws-cdk-stage-app
 
 jobs:
-  deploy:
-    name: Deploy to AWS
+  dev:
+    # this ensures the job ONLY runs when PR targets main/master
+    if: >
+      github.event.pull_request.base.ref == 'main' ||
+      github.event.pull_request.base.ref == 'master'
+    name: dev
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.X
+          node-version: "20.X"
 
       - name: Install AWS CDK Globally
         run: npm install -g aws-cdk
 
-      - name: Configure AWS Credentials
+      - name: Install Dependencies
+        run: npm run prep
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Configure AWS Credentials (DEV)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-1"
-
-      - name: Install Dependencies
-        run: npm run prep
-
-      - name: Building Project
-        run: npm run build
 
       - name: Conditional CDK Bootstrap
         run: |
@@ -59,5 +64,5 @@ jobs:
             npm run bootstrap
           fi
 
-      - name: Deploy to AWS
-        run: npm run deploy
+      - name: Deploy DEV Stack
+        run: npm run deploy:dev
